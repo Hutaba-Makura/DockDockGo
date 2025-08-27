@@ -1,0 +1,62 @@
+name: Deploy DockDockGo to Sakura Apprun
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: チェックアウト
+        uses: actions/checkout@v4
+
+      - name: バックエンドをデプロイ
+        id: deploy-backend
+        uses: ippanpeople/sacloud-apprun-action@v0.0.4
+        with:
+          use-repository-dockerfile: false
+          app-dir: ./backend
+          sakura-api-key: ${{ secrets.SAKURA_API_KEY }}
+          sakura-api-secret: ${{ secrets.SAKURA_API_SECRET }}
+          container-registry: ${{ secrets.REGISTRY }}
+          container-registry-user: ${{ secrets.REGISTRY_USER }}
+          container-registry-password: ${{ secrets.REGISTRY_PASSWORD }}
+          port: '8000'
+          app-name: 'dockdockgo-backend'
+
+      - name: バックエンドURLを環境変数に設定
+        run: echo "BACKEND_URL=$(echo \"${{ steps.deploy-backend.outputs.public-url }}\" | sed 's/\\//g')" >> $GITHUB_ENV
+        env:
+          BACKEND_URL: ${{ steps.deploy-backend.outputs.public-url }}
+
+      - name: フロントエンドをデプロイ
+        id: deploy-frontend
+        uses: ippanpeople/sacloud-apprun-action@v0.0.4
+        with:
+          use-repository-dockerfile: false
+          app-dir: ./frontend
+          sakura-api-key: ${{ secrets.SAKURA_API_KEY }}
+          sakura-api-secret: ${{ secrets.SAKURA_API_SECRET }}
+          container-registry: ${{ secrets.REGISTRY }}
+          container-registry-user: ${{ secrets.REGISTRY_USER }}
+          container-registry-password: ${{ secrets.REGISTRY_PASSWORD }}
+          port: '80'
+          app-name: 'dockdockgo-frontend'
+
+      - name: フロントエンドURLを環境変数に設定
+        run: echo "FRONTEND_URL=$(echo \"${{ steps.deploy-frontend.outputs.public-url }}\" | sed 's/\\//g')" >> $GITHUB_ENV
+        env:
+          FRONTEND_URL: ${{ steps.deploy-frontend.outputs.public-url }}
+
+      - name: デプロイ結果を通知
+        if: env.FRONTEND_URL != '' && env.BACKEND_URL != ''
+        uses: ippanpeople/slack-notify-action@v0.0.5
+        with:
+          webhook_url: ${{ secrets.SLACK_WEBHOOK_URL }}
+          pretext: "DockDockGo デプロイ完了 ✅ <!channel>"
+          author_name: ":github_white: ${{ vars.AUTHOR_NAME }}"
+          repository: "${{ vars.REPOSITORY }}"
+          message: ":frontend: フロントエンド: ${{ env.FRONTEND_URL }}\n:backend: バックエンド: ${{ env.BACKEND_URL }}"
