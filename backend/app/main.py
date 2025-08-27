@@ -34,8 +34,8 @@ mock_results: List[Dict[str, Any]] = [
     },
 ]
 
-# /search エンドポイント
-@app.get("/search")
+# /mock エンドポイント
+@app.get("/mock")
 def search(q: Optional[str] = None):
     """
     検索クエリに基づいてモックデータを返すエンドポイント
