@@ -1,49 +1,59 @@
-"""
-FastAPI アプリケーションのメインファイル
-アプリケーションの起動、ルータ登録、CORS設定を担当
-"""
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from app.core.config import settings
-from app.core.logging import setup_logging
-from app.api.routes_search import router as search_router
+from typing import List, Dict, Any, Optional
 
-# ログ設定の初期化
-setup_logging()
+# FastAPIアプリケーションを作成
+app = FastAPI()
 
-# FastAPI アプリケーションの作成
-app = FastAPI(
-    title=settings.app_name,
-    version=settings.app_version,
-    description="DockDockGo 検索API",
-    docs_url="/docs",
-    redoc_url="/redoc"
-)
-
-# CORS設定
+# CORS設定（フロントエンドからのアクセスを許可）
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=settings.backend_cors_origins,
+    allow_origins=["http://localhost:3000"],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
 
-# ルーターの登録
-app.include_router(search_router, prefix=settings.api_v1_prefix)
+# モックの検索結果データ
+mock_results: List[Dict[str, Any]] = [
+    {
+        "id": "1",
+        "title": "FastAPI ドキュメント",
+        "description": "FastAPI の公式ドキュメントです。使い方やチュートリアルが豊富にあります。",
+        "url": "https://fastapi.tiangolo.com/",
+        "score": 0.98,
+        "publishedAt": "2023-10-26T12:00:00Z"
+    },
+    {
+        "id": "2",
+        "title": "Mantine UI - Reactコンポーネントライブラリ",
+        "description": "本プロジェクトのフロントエンドで使用しているUIライブラリです。",
+        "url": "https://mantine.dev/",
+        "score": 0.95,
+        "publishedAt": "2023-10-25T12:00:00Z"
+    },
+]
 
-# ヘルスチェックエンドポイント
-@app.get("/health")
-async def health_check():
-    """ヘルスチェックエンドポイント"""
-    return {"status": "healthy", "service": settings.app_name}
-
-# ルートエンドポイント
-@app.get("/")
-async def root():
-    """ルートエンドポイント"""
-    return {
-        "message": "DockDockGo API",
-        "version": settings.app_version,
-        "docs": "/docs"
+# /search エンドポイント
+@app.get("/search")
+def search(q: Optional[str] = None):
+    """
+    検索クエリに基づいてモックデータを返すエンドポイント
+    """
+    print(f"検索クエリ '{q}' を受信しました。")
+    
+    # フロントエンドが必要とするレスポンス形式に合わせてデータを整形
+    response_data = {
+        "results": mock_results,
+        "total": len(mock_results),
+        "page": 1,
+        "limit": 10,
+        "query": q if q else ""
     }
+    
+    return response_data
+
+# ルートURL
+@app.get("/")
+def read_root():
+    return {"message": "Welcome to DockDockGo Simple API"}
