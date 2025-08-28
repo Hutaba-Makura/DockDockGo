@@ -2,10 +2,11 @@ import httpx
 import base64
 import asyncio
 import logging
-from typing import Optional, List, Dict, Any
+from typing import Optional, List
 from fastapi import HTTPException
 from ..core.config import settings
 from ..schemas.search import SearchResult, SearchResponse
+from asyncio import Semaphore
 
 logger = logging.getLogger(__name__)
 
@@ -32,7 +33,7 @@ async def get_docker_compose(client: httpx.AsyncClient, repo_full_name: str) -> 
 async def search_github_repositories(
     query: str,
     page: int = 1,
-    limit: int = 5
+    limit: int = 10
 ) -> SearchResponse:
     """
     GitHub APIを使用してDocker Composeファイルを含むリポジトリを検索する
@@ -45,17 +46,25 @@ async def search_github_repositories(
     if settings.GITHUB_TOKEN:
         headers["Authorization"] = f"Bearer {settings.GITHUB_TOKEN}"
 
-    result = []
+    results = []
     current_page = page
     total_count = 0
 
+    sem = Semaphore(5)
+
+    async def fetch_with_semaphore(repo_full_name: str, client: httpx.AsyncClient):
+        async with sem:
+            # 0.2秒の軽い待機を入れるとさらに安定性が増す
+            await asyncio.sleep(0.2)
+            return await get_docker_compose(client, repo_full_name)
+
     async with httpx.AsyncClient(headers=headers) as client:
-        while len(result) < limit:
+        while len(results) < limit:
             params = {
                 "q": search_query,
                 "sort": "stars",
                 "order": "desc",
-                "page": page,
+                "page": current_page,
                 "per_page": limit,
             }
             try:
@@ -64,44 +73,35 @@ async def search_github_repositories(
                     params=params
                 )
                 search_response.raise_for_status()
-            except httpx.RequestError as exc:
-                raise HTTPException(
-                    status_code=503,
-                    detail=f"サービス利用不可: GitHub APIへの接続に失敗しました。 {exc}"
-                )
-            except httpx.HTTPStatusError as exc:
-                if exc.response.status_code == 403:
-                    logger.warning("GitHub APIのレート制限に達したか、認証情報が無効です。")
-                    raise HTTPException(status_code=403, detail="GitHub APIのレート制限に達したか、認証情報が無効です。")
-                raise HTTPException(
-                    status_code=exc.response.status_code,
-                    detail=exc.response.json()
-                )
+            except Exception as e:
+                logger.error(f"検索APIでエラー: {e}")
+                break
             search_data = search_response.json()
             repositories = search_data.get("items", [])
-            total_count = search_data.get("total_count", 0)
-
+            if current_page == page:
+                total_count = search_data.get("total_count", 0)
             if not repositories:
-                return SearchResponse(results=[], total=0, page=page, limit=limit, query=query)
+                break
 
             logger.info(f"{total_count}件のリポジトリが見つかりました。各リポジトリのdocker-compose.ymlを探します。")
 
-
             tasks = [get_docker_compose(client, repo["full_name"]) for repo in repositories]
-            docker_compose_contents = await asyncio.gather(*tasks)
+            contents = await asyncio.gather(*tasks, return_exceptions=True)
 
-            results = []
-            for repo_info in repositories:
-
-                content = await get_docker_compose(client, repo_info["full_name"])
-
-                if content:
+            for repo_info, content in zip(repositories, contents):
+                if content and not isinstance(content, Exception):
                     results.append(SearchResult(
                         dockercompose=content,
                         create=repo_info.get("full_name", "N/A"),
                         description=repo_info.get("description", "説明がありません。")
                     ))
-                await asyncio.sleep(0.5)
+                    if len(results) >= limit:
+                        break
+
+            if len(results) >= limit:
+                break
+
+            current_page += 1
 
     logger.info(f"最終的に{len(results)}件のdocker-compose.ymlを持つリポジトリを返します。")
     return SearchResponse(
