@@ -1,14 +1,23 @@
 version: '3.8'
 
 services:
+
   frontend:
-    build: ./frontend
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
     ports:
+<<<<<<< HEAD
+      - "8081:80"
+    volumes:
+      - ./frontend/index.html:/usr/share/nginx/html/index.html:ro
+=======
       - "80:80"
     environment:
       - VITE_PUBLIC_API_BASE=http://localhost:8000
     depends_on:
       - backend
+>>>>>>> origin/main
 
   backend:
     build: ./backend
