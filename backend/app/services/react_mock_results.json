@@ -1,7 +1,27 @@
 [
     {
-        "dockercompose": "version: '3.8'\nservices:\n  frontend:\n    image: nginx:alpine\n    ports:\n      - \"80:80\"\n    volumes:\n      - ./build:/usr/share/nginx/html",
-        "create": "toma1128/ai3",
-        "description": "ReactやVueなどでビルドした静的なWebサイトをNginxで配信するための構成です。"
+        "dockercompose": "version: '3.8'\nservices:\n  next-app:\n    build:\n      context: .\n      dockerfile: Dockerfile\n    ports:\n      - \"3000:3000\"\n",
+        "create": "vercel/next.js",
+        "description": "Reactフレームワーク「Next.js」の公式サンプル。開発サーバーをコンテナで起動します。"
+    },
+    {
+        "dockercompose": "version: '3'\nservices:\n  docs:\n    build: .\n    ports:\n      - \"8000:8000\"\n",
+        "create": "facebook/docusaurus",
+        "description": "ドキュメントサイト構築ツール「Docusaurus」の開発環境を起動するための構成です。"
+    },
+    {
+        "dockercompose": "version: '3.8'\nservices:\n  storybook:\n    build: .\n    ports:\n      - \"6006:6006\"\n    volumes:\n      - ./src:/app/src\n",
+        "create": "storybookjs/storybook",
+        "description": "UIコンポーネント開発環境「Storybook」をReactプロジェクトで利用するための構成です。"
+    },
+    {
+        "dockercompose": "version: '3.8'\nservices:\n  app:\n    build: .\n    ports:\n      - \"8080:80\"\n  server:\n    build: ./server\n    ports:\n      - \"3001:3001\"\n",
+        "create": "remix-run/remix",
+        "description": "Reactフレームワーク「Remix」のサンプル。フロントエンドとサーバーを別コンテナで起動します。"
+    },
+    {
+        "dockercompose": "version: '3.8'\nservices:\n  app:\n    build: .\n    command: gatsby develop -H 0.0.0.0\n    ports:\n      - \"8000:8000\"\n    volumes:\n      - .:/app\n",
+        "create": "gatsbyjs/gatsby",
+        "description": "静的サイトジェネレータ「Gatsby」の開発環境をライブリロード付きで起動するための構成です。"
     }
 ]
