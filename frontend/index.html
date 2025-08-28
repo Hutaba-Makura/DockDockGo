@@ -160,11 +160,11 @@
         left: 50%;
         transform: translateX(-50%);
       }
-     .loading-icon {
-       font-size: 2rem;
-       margin-right: 1rem;
-       animation: spin 1s linear infinite;
-     }
+           .loading-icon {
+        font-size: 3rem;
+        margin-right: 1rem;
+        animation: spin 1s linear infinite;
+      }
      @keyframes spin {
        from { transform: rotate(0deg); }
        to { transform: rotate(360deg); }
@@ -254,7 +254,7 @@
       return card;
     }
 
-         async function fetchAndRender(query = "") {
+    async function fetchAndRender(query = "") {
        const v = document.getElementById("search-input").value;
        console.log(v);
        
@@ -267,9 +267,6 @@
          </div>
        `;
 
-       //ここで2秒待つ
-       await new Promise(resolve => setTimeout(resolve, 2000));
-       
        // 初回検索時のみレイアウト変更
        const navbar = document.getElementById("navbar");
        const searchArea = document.getElementById("search-area");
