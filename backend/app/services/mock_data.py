@@ -90,17 +90,70 @@ services:
     },
 ]
 
+PYTHON_MOCK_RESULTS: List[Dict[str, Any]] = [
+    {
+        "dockercompose": """
+version: '3.8'
+services:
+  api:
+    build: .
+    ports:
+      - "8000:8000"
+    volumes:
+      - .:/app
+""",
+        "create": "toma1128/ai4",
+        "description": "DjangoやRailsアプリケーションとRedisをキャッシュとして連携させる構成です。"
+    }
+]
+
+REACT_MOCK_RESULTS: List[Dict[str, Any]] = [
+    {
+        "dockercompose": """
+version: '3.8'
+services:
+  frontend:
+    image: nginx:alpine
+    ports:
+      - "80:80"
+    volumes:
+      - ./build:/usr/share/nginx/html
+""",
+        "create": "toma1128/ai3",
+        "description": "ReactやVueなどでビルドした静的なWebサイトをNginxで配信するための構成です。"
+    }
+]
+
 def get_mock_data(query: Optional[str] = None) -> MockResponse:
-    """
-    検索クエリに基づいてモックデータを返す
-    """
     print(f"検索クエリ '{query}' を受信しました。")
 
-    # フロントエンドが必要とするレスポンス形式に合わせてデータを整形
+    if not query:
+        return MockResponse(
+            results=[SearchResult(**result) for result in DEFAULT_MOCK_RESULTS],
+            total=len(DEFAULT_MOCK_RESULTS),
+            page=1,
+            limit=10,
+            query=""
+        )
+
+    q_lower = query.lower()
+    results: List[Dict[str, Any]] = []
+
+    results = []
+
+    # AND検索のように、複数のキーワードが含まれているかをチェック
+    if 'fastapi' in q_lower and 'react' in q_lower:
+        results = REACT_MOCK_RESULTS
+    elif "python" in q_lower:
+        results = PYTHON_MOCK_RESULTS
+    else:
+        # 一致するキーワードがない場合はデフォルトのデータを返す
+        results = MOCK_RESULTS
+
     return MockResponse(
-        results=[SearchResult(**result) for result in MOCK_RESULTS],
-        total=len(MOCK_RESULTS),
+        results=[SearchResult(**result) for result in results],
+        total=len(results),
         page=1,
         limit=10,
-        query=query if query else ""
+        query=query
     )
