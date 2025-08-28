@@ -129,8 +129,8 @@ def get_mock_data(query: Optional[str] = None) -> MockResponse:
 
     if not query:
         return MockResponse(
-            results=[SearchResult(**result) for result in DEFAULT_MOCK_RESULTS],
-            total=len(DEFAULT_MOCK_RESULTS),
+            results=[SearchResult(**result) for result in MOCK_RESULTS],
+            total=len(MOCK_RESULTS),
             page=1,
             limit=10,
             query=""
