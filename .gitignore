@@ -1,1 +1,6 @@
 doc/
+backend/app/__pycache__/
+backend/app/api/__pycache__/
+backend/app/core/__pycache__/
+backend/app/schemas/__pycache__/
+backend/app/services/__pycache__/
