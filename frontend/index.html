@@ -153,7 +153,9 @@
     }
 
     async function fetchAndRender(query = "") {
-      const res = await fetch("https://app-8c454da6-195d-408c-800e-23226514c8dc.ingress.apprun.sakura.ne.jp/mock");
+      const v = document.getElementById("search-input").value;
+      console.log(v);
+      const res = await fetch("https://app-8c454da6-195d-408c-800e-23226514c8dc.ingress.apprun.sakura.ne.jp/mock?q="+v);
       const json = await res.json();
       const container = document.getElementById("card-container");
       container.innerHTML = "";
