@@ -45,56 +45,63 @@ async def search_github_repositories(
     if settings.GITHUB_TOKEN:
         headers["Authorization"] = f"Bearer {settings.GITHUB_TOKEN}"
 
-    params = {
-        "q": search_query,
-        "sort": "stars",
-        "order": "desc",
-        "page": page,
-        "per_page": limit,
-    }
+    result = []
+    current_page = page
+    total_count = 0
 
-    async with httpx.AsyncClient() as client:
-        try:
-            search_response = await client.get(
-                f"{settings.GITHUB_API_URL}/search/repositories",
-                params=params
-            )
-            search_response.raise_for_status()
-        except httpx.RequestError as exc:
-            raise HTTPException(
-                status_code=503,
-                detail=f"サービス利用不可: GitHub APIへの接続に失敗しました。 {exc}"
-            )
-        except httpx.HTTPStatusError as exc:
-            if exc.response.status_code == 403:
-                logger.warning("GitHub APIのレート制限に達したか、認証情報が無効です。")
-                raise HTTPException(status_code=403, detail="GitHub APIのレート制限に達したか、認証情報が無効です。")
-            raise HTTPException(
-                status_code=exc.response.status_code,
-                detail=exc.response.json()
-            )
-        search_data = search_response.json()
-        repositories = search_data.get("items", [])
-        total_count = search_data.get("total_count", 0)
+    async with httpx.AsyncClient(headers=headers) as client:
+        while len(result) < limit:
+            params = {
+                "q": search_query,
+                "sort": "stars",
+                "order": "desc",
+                "page": page,
+                "per_page": limit,
+            }
+            try:
+                search_response = await client.get(
+                    f"{settings.GITHUB_API_URL}/search/repositories",
+                    params=params
+                )
+                search_response.raise_for_status()
+            except httpx.RequestError as exc:
+                raise HTTPException(
+                    status_code=503,
+                    detail=f"サービス利用不可: GitHub APIへの接続に失敗しました。 {exc}"
+                )
+            except httpx.HTTPStatusError as exc:
+                if exc.response.status_code == 403:
+                    logger.warning("GitHub APIのレート制限に達したか、認証情報が無効です。")
+                    raise HTTPException(status_code=403, detail="GitHub APIのレート制限に達したか、認証情報が無効です。")
+                raise HTTPException(
+                    status_code=exc.response.status_code,
+                    detail=exc.response.json()
+                )
+            search_data = search_response.json()
+            repositories = search_data.get("items", [])
+            total_count = search_data.get("total_count", 0)
 
-        if not repositories:
-            return SearchResponse(results=[], total=0, page=page, limit=limit, query=query)
+            if not repositories:
+                return SearchResponse(results=[], total=0, page=page, limit=limit, query=query)
 
-        logger.info(f"{total_count}件のリポジトリが見つかりました。各リポジトリのdocker-compose.ymlを探します。")
+            logger.info(f"{total_count}件のリポジトリが見つかりました。各リポジトリのdocker-compose.ymlを探します。")
 
-        # 並行してDocker Composeファイルを取得
-        tasks = [get_docker_compose(client, repo["full_name"]) for repo in repositories]
-        docker_compose_contents = await asyncio.gather(*tasks)
 
-    # 結果を整形
-    results = []
-    for repo_info, content in zip(repositories, docker_compose_contents):
-        if content:
-            results.append(SearchResult(
-                dockercompose=content,
-                create=repo_info.get("full_name", "N/A"),
-                description=repo_info.get("description", "説明がありません。")
-            ))
+            tasks = [get_docker_compose(client, repo["full_name"]) for repo in repositories]
+            docker_compose_contents = await asyncio.gather(*tasks)
+
+            results = []
+            for repo_info in repositories:
+
+                content = await get_docker_compose(client, repo_info["full_name"])
+
+                if content:
+                    results.append(SearchResult(
+                        dockercompose=content,
+                        create=repo_info.get("full_name", "N/A"),
+                        description=repo_info.get("description", "説明がありません。")
+                    ))
+                await asyncio.sleep(0.5)
 
     logger.info(f"最終的に{len(results)}件のdocker-compose.ymlを持つリポジトリを返します。")
     return SearchResponse(

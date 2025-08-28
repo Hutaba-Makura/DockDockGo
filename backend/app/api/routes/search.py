@@ -17,7 +17,7 @@ def mock(q: Optional[str] = None):
 async def search(
     q: str = Query(..., min_length=1, description="検索キーワード"),
     page: int = Query(1, ge=1, description="ページ番号"),
-    limit: int = Query(10, ge=1, le=100, description="1ページあたりの取得件数")
+    limit: int = Query(5, ge=1, le=100, description="1ページあたりの取得件数")
 ):
     """
     GitHub APIを使用してDocker Composeファイルを含むリポジトリを検索するエンドポイント
