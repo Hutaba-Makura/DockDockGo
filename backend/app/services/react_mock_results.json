@@ -1,8 +1,8 @@
 [
     {
-        "dockercompose": "version: '3.8'\nservices:\n  next-app:\n    build:\n      context: .\n      dockerfile: Dockerfile\n    ports:\n      - \"3000:3000\"\n",
-        "create": "vercel/next.js",
-        "description": "Reactフレームワーク「Next.js」の公式サンプル。開発サーバーをコンテナで起動します。"
+        "dockercompose": "version: '3.7'\n\nservices:\n  postgres:\n    image: postgres:13\n    restart: always\n    volumes:\n      - postgres_data:/var/lib/postgresql/data\n    environment:\n      POSTGRES_HOST_AUTH_METHOD: trust\n\n  redis:\n    image: redis:6\n    restart: always\n    volumes:\n      - redis_data:/data\n\n  minio:\n    image: minio/minio:RELEASE.2022-03-17T06-34-49Z\n    restart: always\n    command: server /data --console-address \":9001\"\n    ports:\n      - \"9001:9001\"\n    volumes:\n      - minio_data:/data\n    environment:\n      MINIO_ROOT_USER: \"minio\"\n      MINIO_ROOT_PASSWORD: \"password\"\n\n  app:\n    build: .\n    restart: always\n    ports:\n      - \"3000:3000\"\n    depends_on:\n      - postgres\n      - redis\n      - minio\n    environment:\n      - SECRET_KEY=your-secret-key\n      - DATABASE_URL=postgresql://postgres@postgres/outline\n      - REDIS_URL=redis://redis:6379\n      - AWS_ACCESS_KEY_ID=minio\n      - AWS_SECRET_ACCESS_KEY=password\n      - AWS_S3_UPLOAD_BUCKET_URL=http://minio:9000\n      - AWS_S3_UPLOAD_BUCKET_NAME=outline\n      - AWS_S3_FORCE_PATH_STYLE=true\n\nvolumes:\n  postgres_data:\n  redis_data:\n  minio_data:\n",
+        "create": "outline/outline",
+        "description": "チーム向けのモダンなナレッジベースツール。React製の本体アプリ、PostgreSQL、Redisに加え、ファイルストレージ用のMinIOを連携させる構成です。"
     },
     {
         "dockercompose": "version: '3'\nservices:\n  docs:\n    build: .\n    ports:\n      - \"8000:8000\"\n",
