@@ -4,21 +4,16 @@ services:
   frontend:
     build: ./frontend
     ports:
-      - "3000:3000"
+      - "80:80"
     environment:
       - VITE_PUBLIC_API_BASE=http://localhost:8000
     depends_on:
       - backend
-    volumes:
-      - ./frontend:/app
-      - /app/node_modules
 
   backend:
     build: ./backend
     ports:
       - "8000:8000"
     environment:
-      - BACKEND_CORS_ORIGINS=http://localhost:3000
+      - BACKEND_CORS_ORIGINS=http://localhost
       - LOG_LEVEL=INFO
-    volumes:
-      - ./backend:/app
