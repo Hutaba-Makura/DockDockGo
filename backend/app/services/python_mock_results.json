@@ -1,7 +1,27 @@
 [
     {
-        "dockercompose": "version: '3.8'\nservices:\n  api:\n    build: .\n    ports:\n      - \"8000:8000\"\n    volumes:\n      - .:/app",
-        "create": "toma1128/ai4",
-        "description": "DjangoやRailsアプリケーションとRedisをキャッシュとして連携させる構成です。"
+        "dockercompose": "version: '3.7'\nservices:\n  web:\n    build: .\n    command: python manage.py runserver 0.0.0.0:8000\n    volumes:\n      - .:/code\n    ports:\n      - \"8000:8000\"\n    depends_on:\n      - db\n  db:\n    image: postgres:13\n    environment:\n      - \"POSTGRES_HOST_AUTH_METHOD=trust\"\n",
+        "create": "django/django",
+        "description": "Webフレームワーク「Django」とPostgreSQLを連携させる基本的な開発環境の構成です。"
+    },
+    {
+        "dockercompose": "version: '3.9'\nservices:\n  web:\n    build: .\n    ports:\n      - \"8050:8050\"\n    volumes:\n      - .:/app\n",
+        "create": "plotly/dash-sample-apps",
+        "description": "データ可視化ライブラリ「Plotly Dash」のサンプルアプリを起動するためのシンプルな構成です。"
+    },
+    {
+        "dockercompose": "version: '3.8'\nservices:\n  odoo:\n    image: odoo:16.0\n    ports:\n      - \"8069:8069\"\n    depends_on:\n      - db\n  db:\n    image: postgres:15\n    environment:\n      - POSTGRES_PASSWORD=odoo\n      - POSTGRES_USER=odoo\n",
+        "create": "odoo/odoo",
+        "description": "オープンソースERP「Odoo」とPostgreSQLデータベースを起動するための公式構成です。"
+    },
+    {
+        "dockercompose": "version: '3.8'\nservices:\n  app:\n    build: .\n    ports:\n      - \"5000:5000\"\n    depends_on:\n      - redis\n  worker:\n    build: .\n    command: celery -A app.celery worker --loglevel=info\n    depends_on:\n      - redis\n  redis:\n    image: redis:6-alpine\n",
+        "create": "tiangolo/celery-fastapi-redis-postgresql",
+        "description": "FastAPIとバックグラウンド処理用のCelery、メッセージブローカーのRedisを組み合わせた構成です。"
+    },
+    {
+        "dockercompose": "version: '3.7'\nservices:\n  superset:\n    image: amancevice/superset\n    ports:\n      - \"8088:8088\"\n    environment:\n      - SUPERSET_LOAD_EXAMPLES=yes\n",
+        "create": "apache/superset",
+        "description": "Apache Superset（BIツール）を簡単に試すための構成です。サンプルデータも読み込まれます。"
     }
 ]
