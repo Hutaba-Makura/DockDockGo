@@ -255,6 +255,7 @@
     }
 
     async function fetchAndRender(query = "") {
+       const startTime = Date.now();
        const v = document.getElementById("search-input").value;
        console.log(v);
        
@@ -294,6 +295,16 @@
        try {
          const res = await fetch("https://app-8c454da6-195d-408c-800e-23226514c8dc.ingress.apprun.sakura.ne.jp/mock?q="+v);
          const json = await res.json();
+         
+         // 経過時間を計算
+         const elapsedTime = Date.now() - startTime;
+         const minWaitTime = 1500; // 1.5秒
+         
+         // 2秒未満の場合は残り時間待つ
+         if (elapsedTime < minWaitTime) {
+           const remainingTime = minWaitTime - elapsedTime;
+           await new Promise(resolve => setTimeout(resolve, remainingTime));
+         }
          
          // 結果を表示
          container.innerHTML = "";
