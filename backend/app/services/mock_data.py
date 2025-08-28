@@ -20,40 +20,6 @@ def load_mock_data(file_name: str) -> List[Dict[str, Any]]:
         print(f"Error: JSON file parsing error: {e}")
         return []
 
-PYTHON_MOCK_RESULTS: List[Dict[str, Any]] = [
-    {
-        "dockercompose": """
-version: '3.8'
-services:
-  api:
-    build: .
-    ports:
-      - "8000:8000"
-    volumes:
-      - .:/app
-""",
-        "create": "toma1128/ai4",
-        "description": "DjangoやRailsアプリケーションとRedisをキャッシュとして連携させる構成です。"
-    }
-]
-
-REACT_MOCK_RESULTS: List[Dict[str, Any]] = [
-    {
-        "dockercompose": """
-version: '3.8'
-services:
-  frontend:
-    image: nginx:alpine
-    ports:
-      - "80:80"
-    volumes:
-      - ./build:/usr/share/nginx/html
-""",
-        "create": "toma1128/ai3",
-        "description": "ReactやVueなどでビルドした静的なWebサイトをNginxで配信するための構成です。"
-    }
-]
-
 def get_mock_data(query: Optional[str] = None) -> MockResponse:
     print(f"検索クエリ '{query}' を受信しました。")
 
