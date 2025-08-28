@@ -1,14 +1,12 @@
-FROM node:18-alpine
+FROM nginx:alpine
 
-WORKDIR /app
+# HTMLファイルをNginxのドキュメントルートにコピー
+COPY index.html /usr/share/nginx/html/
 
-# 依存関係のコピーとインストール
-COPY package*.json ./
-RUN npm ci
+# カスタムNginx設定をコピー（オプション）
+COPY nginx.conf /etc/nginx/nginx.conf
 
-# ソースコードのコピー
-COPY . .
+# ポート80を公開
+EXPOSE 80
 
-# 開発サーバーの起動
-EXPOSE 3000
-CMD ["npm", "run", "dev"]
+CMD ["nginx", "-g", "daemon off;"]
