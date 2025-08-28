@@ -162,12 +162,10 @@ async def search(
 
     results = [
         {
-            "id": str(item["id"]),
-            "title": item["full_name"],
-            "description": item.get("description"), # descriptionがない場合もある
-            "url": item["html_url"],
-            "score": item.get("stargazers_count", 0),
-            "publishedAt": item.get("pushed_at"),
+            "dockercompose": item.get("dockercompose", ""),
+            "create": item["full_name"],
+            "description": item.get("description", "no description"),
+            "url": item["html_url"]
         }
         for item in data.get("items", [])
     ]
