@@ -178,13 +178,6 @@
       document.getElementById("card-container").scrollBy({ left: amount, behavior: "smooth" });
     }
 
-    function highlight(text, terms) {
-      if (!terms.length) return text;
-      const escapedTerms = terms.map(t => t.replace(/[.*+?^${}()|[\]\\]/g, "\\$&"));
-      const pattern = new RegExp(`(${escapedTerms.join("|")})`, "gi");
-      return text.replace(pattern, match => `<mark>${match}</mark>`);
-    }
-
     function createCard(file, terms) {
       const card = document.createElement("div");
       card.className = "card";
@@ -226,8 +219,7 @@
           Prism.highlightElement(tempCode);
         }
         
-        // 検索ハイライトを適用
-        lineCodeWrapper.innerHTML = highlight(tempCode.innerHTML, terms);
+        lineCodeWrapper.innerHTML = tempCode.innerHTML;
 
         lineDiv.appendChild(lineNumber);
         lineDiv.appendChild(lineCodeWrapper);
