@@ -6,7 +6,7 @@ load_dotenv(dotenv_path=os.path.join(os.path.dirname(__file__), '..', '..', '.en
 
 class Settings:
     # CORS設定
-    CORS_ORIGINS: List[str] = ["http://localhost:3000"]
+    CORS_ORIGINS: List[str] = ["*"]
 
     # GitHub API設定
     GITHUB_API_URL: str = "https://api.github.com"
