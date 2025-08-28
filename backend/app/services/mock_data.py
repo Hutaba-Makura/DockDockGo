@@ -1,94 +1,24 @@
+import json
+import os
 from typing import List, Dict, Any, Optional
 from ..schemas.search import SearchResult, MockResponse
 
-# モックの検索結果データ
-MOCK_RESULTS: List[Dict[str, Any]] = [
-    {
-        "dockercompose": """
-version: '3.8'
-services:
-  web:
-    build: .
-    ports:
-      - "3000:3000"
-    depends_on:
-      - db
-  db:
-    image: postgres:13
-    environment:
-      POSTGRES_DB: myapp
-      POSTGRES_USER: user
-      POSTGRES_PASSWORD: password
-""",
-        "create": "Accord33/synctimer (or created from AI)",
-        "description": "Node.jsアプリとPostgreSQLデータベースを連携させる構成です。"
-    },
-    {
-        "dockercompose": """
-version: '3.8'
-services:
-  api:
-    build: .
-    ports:
-      - "8000:8000"
-    volumes:
-      - .:/app
-""",
-        "create": "toma1128/ai2",
-        "description": "PythonのFastAPIやFlaskなど、単一のバックエンドAPIを開発するためのシンプルな構成です。"
-    },
-    {
-        "dockercompose": """
-version: '3.8'
-services:
-  frontend:
-    image: nginx:alpine
-    ports:
-      - "80:80"
-    volumes:
-      - ./build:/usr/share/nginx/html
-""",
-        "create": "toma1128/ai3",
-        "description": "ReactやVueなどでビルドした静的なWebサイトをNginxで配信するための構成です。"
-    },
-    {
-        "dockercompose": """
-version: '3.8'
-services:
-  app:
-    build: .
-    ports:
-      - "8000:8000"
-    depends_on:
-      - redis
-  redis:
-    image: "redis:alpine"
-""",
-        "create": "toma1128/ai4",
-        "description": "DjangoやRailsアプリケーションとRedisをキャッシュとして連携させる構成です。"
-    },
-    {
-        "dockercompose": """
-version: '3.8'
-services:
-  wordpress:
-    image: wordpress:latest
-    ports:
-      - "8080:80"
-    depends_on:
-      - db
-  db:
-    image: mysql:5.7
-    environment:
-      MYSQL_DATABASE: wordpress
-      MYSQL_USER: user
-      MYSQL_PASSWORD: password
-      MYSQL_ROOT_PASSWORD: rootpassword
-""",
-        "create": "toma1128/ai5",
-        "description": "WordPressとMySQLデータベースを起動するための標準的な構成です。"
-    },
-]
+def load_mock_results() -> List[Dict[str, Any]]:
+    """
+    JSONファイルからモックデータを読み込む
+    """
+    current_dir = os.path.dirname(os.path.abspath(__file__))
+    json_file_path = os.path.join(current_dir, 'mock_results.json')
+    
+    try:
+        with open(json_file_path, 'r', encoding='utf-8') as f:
+            return json.load(f)
+    except FileNotFoundError:
+        print(f"Error: {json_file_path} not found. Returning empty list.")
+        return []
+    except json.JSONDecodeError as e:
+        print(f"Error: JSON file parsing error: {e}")
+        return []
 
 def get_mock_data(query: Optional[str] = None) -> MockResponse:
     """
@@ -96,10 +26,13 @@ def get_mock_data(query: Optional[str] = None) -> MockResponse:
     """
     print(f"検索クエリ '{query}' を受信しました。")
 
+    # JSONファイルからモックデータを読み込み
+    mock_results = load_mock_results()
+
     # フロントエンドが必要とするレスポンス形式に合わせてデータを整形
     return MockResponse(
-        results=[SearchResult(**result) for result in MOCK_RESULTS],
-        total=len(MOCK_RESULTS),
+        results=[SearchResult(**result) for result in mock_results],
+        total=len(mock_results),
         page=1,
         limit=10,
         query=query if query else ""
