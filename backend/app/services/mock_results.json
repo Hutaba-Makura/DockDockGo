@@ -1,8 +1,8 @@
 [
     {
-        "dockercompose": "version: '3.8'\nservices:\n  web:\n    build: .\n    ports:\n      - \"3000:3000\"\n    depends_on:\n      - db\n  db:\n    image: postgres:13\n    environment:\n      POSTGRES_DB: myapp\n      POSTGRES_USER: user\n      POSTGRES_PASSWORD: password",
-        "create": "Accord33/synctimer (or created from AI)",
-        "description": "Node.jsアプリとPostgreSQLデータベースを連携させる構成です。"
+        "dockercompose": "version: '3.8'\nservices:\n  frontend:\n    build:\n      context: ./frontend\n      dockerfile: Dockerfile\n    ports:\n      - \"8081:80\"\n    volumes:\n      - ./frontend/index.html:/usr/share/nginx/html/index.html:ro\n  backend:\n    build: ./backend\n    ports:\n      - \"8000:8000\"\n    environment:\n      - BACKEND_CORS_ORIGINS=http://localhost\n      - LOG_LEVEL=INFO",
+        "create": "Hutaba-Makura / DockDockGo",
+        "description": "React/TypeScriptのフロントとFastAPIのバックエンドを持つDockerfile検索サイト。Dockerで開発環境を統合。検索機能のUIやAPI連携の仕組み構築が目的。"
     },
     {
         "dockercompose": "version: '3.8'\nservices:\n  api:\n    build: .\n    ports:\n      - \"8000:8000\"\n    volumes:\n      - .:/app",
