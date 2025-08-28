@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <title>Docker Compose Explorer</title>
+  <title>DockDockGo</title>
   <!-- Prism.js CSS for syntax highlighting -->
   <link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism.min.css" rel="stylesheet" />
   <style>
@@ -20,6 +20,10 @@
     }
     .navbar-left {
       display: flex; align-items: center; gap: 1rem;
+      color: #374151;
+    }
+    .navbar-left h1 {
+      font-weight: 300;
     }
     .navbar-content .icon { font-size: 1.5rem; }
     .search-area { 
@@ -45,8 +49,13 @@
       font-size: 2.5rem;
       font-weight: 300;
       color: #374151;
-      margin-bottom: 2rem;
       letter-spacing: -0.025em;
+      margin-bottom: 0.5rem;
+    }
+    .main-description {
+      margin-bottom: 2rem;
+      color: #374151;
+      margin-top: 0px;
     }
     #search-input {
       width: 50%; padding: 0.75rem 1rem; border-radius: 9999px;
@@ -89,7 +98,7 @@
     }
     .card-header p { font-size: 0.8rem; color: #666; }
     .code-block {
-      background-color: #fefefe; padding: 1rem; overflow-x: auto;
+      background-color: #ffffff; padding: 1rem; overflow-x: auto;
       font-family: 'Consolas', 'Monaco', 'Courier New', monospace; font-size: 0.85rem; border-radius: 0.5rem;
       white-space: pre; height: 100%; overflow-y: auto;
     }
@@ -154,7 +163,7 @@
     <div class="navbar-content">
       <div class="navbar-left">
         <span class="icon"><iconify-icon icon="line-md:github-loop" width="36" height="36"></iconify-icon></span>
-        <h1>Docker Compose Explorer</h1>
+        <h1>DockDockGo</h1>
       </div>
       <div class="navbar-search" id="navbar-search" style="display: none;">
         <!-- 検索バーがここに移動される -->
@@ -163,7 +172,8 @@
   </nav>
 
   <div class="search-area centered" id="search-area">
-    <h1 class="main-title">Dockerファイル生成ツール</h1>
+    <h1 class="main-title">DockDockGo</h1>
+    <p class="main-description">Docker Composeファイルを簡単に検索できるサイト</p>
     <input type="text" id="search-input" placeholder="Search for Docker Compose configurations..." />
   </div>
 
