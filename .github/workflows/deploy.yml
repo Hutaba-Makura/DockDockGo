@@ -17,7 +17,7 @@ jobs:
         id: deploy-backend
         uses: ippanpeople/sacloud-apprun-action@v0.0.4
         with:
-          use-repository-dockerfile: false
+          use-repository-dockerfile: true
           app-dir: ./backend
           sakura-api-key: ${{ secrets.SAKURA_API_KEY }}
           sakura-api-secret: ${{ secrets.SAKURA_API_SECRET }}
@@ -36,7 +36,7 @@ jobs:
         id: deploy-frontend
         uses: ippanpeople/sacloud-apprun-action@v0.0.4
         with:
-          use-repository-dockerfile: false
+          use-repository-dockerfile: true
           app-dir: ./frontend
           sakura-api-key: ${{ secrets.SAKURA_API_KEY }}
           sakura-api-secret: ${{ secrets.SAKURA_API_SECRET }}
