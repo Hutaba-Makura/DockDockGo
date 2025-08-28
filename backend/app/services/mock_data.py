@@ -3,12 +3,12 @@ import os
 from typing import List, Dict, Any, Optional
 from ..schemas.search import SearchResult, MockResponse
 
-def load_mock_results() -> List[Dict[str, Any]]:
+def load_mock_data(file_name: str) -> List[Dict[str, Any]]:
     """
     JSONファイルからモックデータを読み込む
     """
     current_dir = os.path.dirname(os.path.abspath(__file__))
-    json_file_path = os.path.join(current_dir, 'mock_results.json')
+    json_file_path = os.path.join(current_dir, file_name)
     
     try:
         with open(json_file_path, 'r', encoding='utf-8') as f:
@@ -26,14 +26,32 @@ def get_mock_data(query: Optional[str] = None) -> MockResponse:
     """
     print(f"検索クエリ '{query}' を受信しました。")
 
-    # JSONファイルからモックデータを読み込み
-    mock_results = load_mock_results()
+    if not query:
+        mock_results = load_mock_data('mock_results.json')
+        return MockResponse(
+            results=[SearchResult(**result) for result in mock_results],
+            total=len(mock_results),
+            page=1,
+            limit=10,
+            query=""
+        )
 
-    # フロントエンドが必要とするレスポンス形式に合わせてデータを整形
+    q_lower = query.lower()
+    results: List[Dict[str, Any]] = []
+
+    # AND検索のように、複数のキーワードが含まれているかをチェック
+    if 'fastapi' in q_lower and 'react' in q_lower:
+        results = load_mock_data('react_mock_results.json')
+    elif "python" in q_lower:
+        results = load_mock_data('python_mock_results.json')
+    else:
+        # 一致するキーワードがない場合はデフォルトのデータを返す
+        results = load_mock_data('mock_results.json')
+
     return MockResponse(
-        results=[SearchResult(**result) for result in mock_results],
-        total=len(mock_results),
+        results=[SearchResult(**result) for result in results],
+        total=len(results),
         page=1,
         limit=10,
-        query=query if query else ""
+        query=query
     )

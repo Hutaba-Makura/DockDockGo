@@ -1,0 +1,7 @@
+[
+    {
+        "dockercompose": "version: '3.8'\nservices:\n  frontend:\n    image: nginx:alpine\n    ports:\n      - \"80:80\"\n    volumes:\n      - ./build:/usr/share/nginx/html",
+        "create": "toma1128/ai3",
+        "description": "ReactやVueなどでビルドした静的なWebサイトをNginxで配信するための構成です。"
+    }
+]
