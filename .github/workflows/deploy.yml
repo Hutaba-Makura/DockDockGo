@@ -4,6 +4,7 @@ on:
   push:
     branches:
       - main
+  workflow_dispatch:
 
 jobs:
   deploy:
@@ -17,7 +18,7 @@ jobs:
         id: deploy-backend
         uses: ippanpeople/sacloud-apprun-action@v0.0.4
         with:
-          use-repository-dockerfile: false
+          use-repository-dockerfile: true
           app-dir: ./backend
           sakura-api-key: ${{ secrets.SAKURA_API_KEY }}
           sakura-api-secret: ${{ secrets.SAKURA_API_SECRET }}
@@ -36,7 +37,7 @@ jobs:
         id: deploy-frontend
         uses: ippanpeople/sacloud-apprun-action@v0.0.4
         with:
-          use-repository-dockerfile: false
+          use-repository-dockerfile: true
           app-dir: ./frontend
           sakura-api-key: ${{ secrets.SAKURA_API_KEY }}
           sakura-api-secret: ${{ secrets.SAKURA_API_SECRET }}
@@ -51,12 +52,9 @@ jobs:
         env:
           FRONTEND_URL: ${{ steps.deploy-frontend.outputs.public-url }}
 
-      - name: デプロイ結果を通知
+      - name: デプロイ成功を確認
         if: env.FRONTEND_URL != '' && env.BACKEND_URL != ''
-        uses: ippanpeople/slack-notify-action@v0.0.5
-        with:
-          webhook_url: ${{ secrets.SLACK_WEBHOOK_URL }}
-          pretext: "DockDockGo デプロイ完了 ✅ <!channel>"
-          author_name: ":github_white: ${{ vars.AUTHOR_NAME }}"
-          repository: "${{ vars.REPOSITORY }}"
-          message: ":frontend: フロントエンド: ${{ env.FRONTEND_URL }}\n:backend: バックエンド: ${{ env.BACKEND_URL }}"
+        run: |
+          echo "✅ デプロイが完了しました！"
+          echo "フロントエンド: ${{ env.FRONTEND_URL }}"
+          echo "バックエンド: ${{ env.BACKEND_URL }}"

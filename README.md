@@ -83,14 +83,43 @@ backend/
 
 ## 起動方法
 
+### 開発環境での起動
+
+1. プロジェクトのルートディレクトリで以下を実行:
+```bash
+docker-compose -f docker-compose.dev.yml up --build
+```
+
+2. ブラウザで以下にアクセス:
+- フロントエンド: http://localhost:3000
+- バックエンドAPI: http://localhost:8000
+
+### 本番環境での起動
+
 1. プロジェクトのルートディレクトリで以下を実行:
 ```bash
 docker-compose up --build
 ```
 
 2. ブラウザで以下にアクセス:
-- フロントエンド: http://localhost:3000
+- フロントエンド: http://localhost:80
 - バックエンドAPI: http://localhost:8000
+
+### 個別起動
+
+#### フロントエンドのみ（開発）
+```bash
+cd frontend
+docker build -f Dockerfile.dev -t dockdockgo-frontend-dev .
+docker run -p 3000:3000 -v $(pwd):/app dockdockgo-frontend-dev
+```
+
+#### バックエンドのみ（開発）
+```bash
+cd backend
+docker build -f Dockerfile.dev -t dockdockgo-backend-dev .
+docker run -p 8000:8000 -v $(pwd):/app dockdockgo-backend-dev
+```
 
 ## 開発
 
