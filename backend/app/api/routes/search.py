@@ -4,7 +4,7 @@ from ...services.github_service import search_github_repositories
 from ...services.mock_data import get_mock_data
 from ...schemas.search import SearchResponse, MockResponse
 
-router = APIRouter(prefix="/api", tags=["search"])
+router = APIRouter(tags=["search"])
 
 @router.get("/mock", response_model=MockResponse)
 def mock(q: Optional[str] = None):
