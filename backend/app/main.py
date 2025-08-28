@@ -3,6 +3,8 @@ from fastapi.middleware.cors import CORSMiddleware
 from typing import List, Dict, Any, Optional
 import httpx
 import os
+import asyncio
+import base64
 
 # FastAPIアプリケーションを作成
 app = FastAPI()
@@ -125,14 +127,36 @@ def mock(q: Optional[str] = None):
     return response_data
 
 
-GITHUB_API_URL = "https://api.github.com/search/repositories"
+GITHUB_API_URL = "https://api.github.com"
 GITHUB_TOKEN = os.getenv("GITHUB_API_TOKEN")
+
+"""
+指定したリポジトリのDocker Composeファイルを取得する
+"""
+async def get_docker_compose(client: httpx.AsyncClient, repo_full_name: str) -> Optional[str]:
+  content_url = f"{GITHUB_API_URL}/repos/{repo_full_name}/contents/docker-compose.yml"
+  try:
+    response = await client.get(content_url)
+    response.raise_for_status()
+    data = response.json()
+    if "content" in data:
+      # contentはBase64でエンコードされているためデコードする
+      decoded_content = base64.b64decode(data["content"]).decode('utf-8')
+      return decoded_content
+  except httpx.HTTPError as e:
+    if e.response.status_code == 404:
+      return None
+    return e.response.status_code
+  except Exception as e:
+    return None
+
 @app.get("/search")
 async def search(
     q: str = Query(..., min_length=1, description="検索キーワード"),
     page: int = Query(1, ge=1, description="ページ番号"),
     limit: int = Query(10, ge=1, le=100, description="1ページあたりの取得件数")
 ):
+    search_query = f"{q} filename:docker-compose.yml"
     headers = {
         "Accept": "application/vnd.github.v3+json",
         "User-Agent": "DockDockGo-App"
@@ -141,7 +165,7 @@ async def search(
         headers["Authorization"] = f"Bearer {GITHUB_TOKEN}"
 
     params = {
-        "q": q,
+        "q": search_query,
         "sort": "stars",
         "order": "desc",
         "page": page,
@@ -150,32 +174,35 @@ async def search(
 
     async with httpx.AsyncClient() as client:
         try:
-            response = await client.get(GITHUB_API_URL, params=params, headers=headers)
-            response.raise_for_status()  # 2xx以外のステータスコードで例外を発生
+            search_response = await client.get(f"{GITHUB_API_URL}/search/repositories", params=params)
+            search_response.raise_for_status()  # 2xx以外のステータスコードで例外を発生
         except httpx.RequestError as exc:
             raise HTTPException(status_code=503, detail=f"サービス利用不可: GitHub APIへの接続に失敗しました。 {exc}")
         except httpx.HTTPStatusError as exc:
             # GitHubからのエラーレスポンスをそのままクライアントに返す
             raise HTTPException(status_code=exc.response.status_code, detail=exc.response.json())
 
-    data = response.json()
+    search_data = search_response.json()
+    repositories = search_data.get("items", [])
 
-    results = [
-        {
-            "dockercompose": item.get("dockercompose", ""),
-            "create": item["full_name"],
-            "description": item.get("description", "no description"),
-            "url": item["html_url"]
-        }
-        for item in data.get("items", [])
-    ]
+    tasks = [get_docker_compose(client, repo["full_name"]) for repo in repositories]
+    docker_compose_contents = await asyncio.gather(*tasks)
+
+    results = []
+    for repo, content in zip(repositories, docker_compose_contents):
+      if content:
+          results.append({
+            "dockercompose": content,
+            "create": repo["full_name"],
+            "description": repo.get("description", "no description")
+          })
 
     return {
         "results": results,
-        "total": data.get("total_count", 0),
+        "total": search_data.get("total_count", 0),
         "page": page,
         "limit": limit,
-        "query": q,
+        "query": q
     }
 
 # ルートURL
