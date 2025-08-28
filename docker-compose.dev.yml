@@ -22,7 +22,7 @@ services:
     ports:
       - "8000:8000"
     environment:
-      - BACKEND_CORS_ORIGINS=http://localhost:3000
+      - BACKEND_CORS_ORIGINS=["http://localhost:3000"]
       - LOG_LEVEL=INFO
     volumes:
       - ./backend:/app
