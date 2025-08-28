@@ -14,7 +14,13 @@
     .navbar.visible {
       display: block;
     }
-    .navbar-content { display: flex; align-items: center; gap: 1rem; }
+    .navbar-content { 
+      display: flex; align-items: center; gap: 1rem; 
+      justify-content: space-between;
+    }
+    .navbar-left {
+      display: flex; align-items: center; gap: 1rem;
+    }
     .navbar-content .icon { font-size: 1.5rem; }
     .search-area { 
       padding: 2rem; text-align: center; 
@@ -32,6 +38,9 @@
       position: relative;
       transform: none;
     }
+    .search-area.hidden {
+      display: none;
+    }
     .main-title {
       font-size: 2.5rem;
       font-weight: 300;
@@ -44,6 +53,10 @@
       border: 1px solid #ccc; font-size: 1rem;
       box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
       transition: box-shadow 0.2s ease;
+    }
+    #search-input.in-navbar {
+      width: 300px; font-size: 0.9rem;
+      padding: 0.5rem 1rem;
     }
     #search-input:focus {
       outline: none;
@@ -139,8 +152,13 @@
 <body>
   <nav class="navbar" id="navbar">
     <div class="navbar-content">
-      <span class="icon"><iconify-icon icon="line-md:github-loop" width="36" height="36"></iconify-icon></span>
-      <h1>Docker Compose Explorer</h1>
+      <div class="navbar-left">
+        <span class="icon"><iconify-icon icon="line-md:github-loop" width="36" height="36"></iconify-icon></span>
+        <h1>Docker Compose Explorer</h1>
+      </div>
+      <div class="navbar-search" id="navbar-search" style="display: none;">
+        <!-- 検索バーがここに移動される -->
+      </div>
     </div>
   </nav>
 
@@ -236,9 +254,16 @@
       const searchArea = document.getElementById("search-area");
       const scrollWrapper = document.getElementById("scroll-wrapper");
       const mainTitle = document.querySelector(".main-title");
+      const searchInput = document.getElementById("search-input");
+      const navbarSearch = document.getElementById("navbar-search");
+      
+      // 検索バーをナビゲーションバーに移動
+      navbarSearch.appendChild(searchInput);
+      navbarSearch.style.display = "block";
+      searchInput.className = "in-navbar";
       
       navbar.className = "navbar visible";
-      searchArea.className = "search-area normal";
+      searchArea.className = "search-area hidden";
       scrollWrapper.className = "scroll-wrapper visible";
       
       // h1タイトルを削除
