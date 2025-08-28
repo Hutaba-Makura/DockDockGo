@@ -53,20 +53,20 @@ async def search_github_repositories(
     async with httpx.AsyncClient() as client:
         try:
             search_response = await client.get(
-                f"{settings.GITHUB_API_URL}/search/repositories", 
+                f"{settings.GITHUB_API_URL}/search/repositories",
                 params=params,
                 headers=headers
             )
             search_response.raise_for_status()
         except httpx.RequestError as exc:
             raise HTTPException(
-                status_code=503, 
+                status_code=503,
                 detail=f"サービス利用不可: GitHub APIへの接続に失敗しました。 {exc}"
             )
         except httpx.HTTPStatusError as exc:
             # GitHubからのエラーレスポンスをそのままクライアントに返す
             raise HTTPException(
-                status_code=exc.response.status_code, 
+                status_code=exc.response.status_code,
                 detail=exc.response.json()
             )
 
