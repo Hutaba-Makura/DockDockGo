@@ -144,8 +144,31 @@
       background-color: white; border: 1px solid #ccc;
       cursor: pointer; z-index: 1; font-size: 1.25rem;
     }
-    .scroll-btn.left { left: 1rem; }
-    .scroll-btn.right { right: 1rem; }
+         .scroll-btn.left { left: 1rem; }
+     .scroll-btn.right { right: 1rem; }
+     
+           .loading-container {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        height: 700px;
+        font-size: 1.2rem;
+        color: #6b7280;
+        width: 100%;
+        min-width: 100vw;
+        position: relative;
+        left: 50%;
+        transform: translateX(-50%);
+      }
+     .loading-icon {
+       font-size: 2rem;
+       margin-right: 1rem;
+       animation: spin 1s linear infinite;
+     }
+     @keyframes spin {
+       from { transform: rotate(0deg); }
+       to { transform: rotate(360deg); }
+     }
   </style>
   <script src="https://code.iconify.design/iconify-icon/3.0.0/iconify-icon.min.js"></script>
 </head>
@@ -231,37 +254,63 @@
       return card;
     }
 
-    async function fetchAndRender(query = "") {
-      const v = document.getElementById("search-input").value;
-      console.log(v);
-      const res = await fetch("https://app-8c454da6-195d-408c-800e-23226514c8dc.ingress.apprun.sakura.ne.jp/mock?q="+v);
-      const json = await res.json();
-      const container = document.getElementById("card-container");
-      container.innerHTML = "";
-      const terms = query.toLowerCase().split(/\s+/).filter(Boolean);
-      json.results.forEach(file => container.appendChild(createCard(file, terms)));
-      
-      // 検索実行後、レイアウトを通常表示に変更
-      const navbar = document.getElementById("navbar");
-      const searchArea = document.getElementById("search-area");
-      const scrollWrapper = document.getElementById("scroll-wrapper");
-      const mainTitle = document.querySelector(".main-title");
-      const searchInput = document.getElementById("search-input");
-      const navbarSearch = document.getElementById("navbar-search");
-      
-      // 検索バーをナビゲーションバーに移動
-      navbarSearch.appendChild(searchInput);
-      navbarSearch.style.display = "block";
-      searchInput.className = "in-navbar";
-      
-      navbar.className = "navbar visible";
-      searchArea.className = "search-area hidden";
-      scrollWrapper.className = "scroll-wrapper visible";
-      
-      // h1タイトルを削除
-      if (mainTitle) {
-        mainTitle.remove();
-      }
+         async function fetchAndRender(query = "") {
+       const v = document.getElementById("search-input").value;
+       console.log(v);
+       
+       // Loading表示を開始
+       const container = document.getElementById("card-container");
+       container.innerHTML = `
+         <div class="loading-container">
+           <iconify-icon icon="line-md:loading-twotone-loop" class="loading-icon"></iconify-icon>
+           <span>Loading...</span>
+         </div>
+       `;
+
+       //ここで2秒待つ
+       await new Promise(resolve => setTimeout(resolve, 2000));
+       
+       // 初回検索時のみレイアウト変更
+       const navbar = document.getElementById("navbar");
+       const searchArea = document.getElementById("search-area");
+       const scrollWrapper = document.getElementById("scroll-wrapper");
+       const mainTitle = document.querySelector(".main-title");
+       const searchInput = document.getElementById("search-input");
+       const navbarSearch = document.getElementById("navbar-search");
+       
+       if (!navbar.classList.contains("visible")) {
+         // 検索バーをナビゲーションバーに移動
+         navbarSearch.appendChild(searchInput);
+         navbarSearch.style.display = "block";
+         searchInput.className = "in-navbar";
+         
+         navbar.className = "navbar visible";
+         searchArea.className = "search-area hidden";
+         scrollWrapper.className = "scroll-wrapper visible";
+         
+         // h1タイトルを削除
+         if (mainTitle) {
+           mainTitle.remove();
+         }
+       }
+       
+       try {
+         const res = await fetch("https://app-8c454da6-195d-408c-800e-23226514c8dc.ingress.apprun.sakura.ne.jp/mock?q="+v);
+         const json = await res.json();
+         
+         // 結果を表示
+         container.innerHTML = "";
+         const terms = query.toLowerCase().split(/\s+/).filter(Boolean);
+         json.results.forEach(file => container.appendChild(createCard(file, terms)));
+               } catch (error) {
+          // エラー時の処理
+          container.innerHTML = `
+            <div class="loading-container">
+              <span>エラーが発生しました。もう一度お試しください。</span>
+            </div>
+          `;
+          console.error("検索エラー:", error);
+        }
     }
 
     document.getElementById("search-input").addEventListener("keydown", (e) => {
