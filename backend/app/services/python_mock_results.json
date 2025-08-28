@@ -1,0 +1,7 @@
+[
+    {
+        "dockercompose": "version: '3.8'\nservices:\n  api:\n    build: .\n    ports:\n      - \"8000:8000\"\n    volumes:\n      - .:/app",
+        "create": "toma1128/ai4",
+        "description": "DjangoやRailsアプリケーションとRedisをキャッシュとして連携させる構成です。"
+    }
+]

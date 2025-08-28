@@ -1,0 +1,27 @@
+[
+    {
+        "dockercompose": "version: '3.8'\nservices:\n  web:\n    build: .\n    ports:\n      - \"3000:3000\"\n    depends_on:\n      - db\n  db:\n    image: postgres:13\n    environment:\n      POSTGRES_DB: myapp\n      POSTGRES_USER: user\n      POSTGRES_PASSWORD: password",
+        "create": "Accord33/synctimer (or created from AI)",
+        "description": "Node.jsアプリとPostgreSQLデータベースを連携させる構成です。"
+    },
+    {
+        "dockercompose": "version: '3.8'\nservices:\n  api:\n    build: .\n    ports:\n      - \"8000:8000\"\n    volumes:\n      - .:/app",
+        "create": "toma1128/ai2",
+        "description": "PythonのFastAPIやFlaskなど、単一のバックエンドAPIを開発するためのシンプルな構成です。"
+    },
+    {
+        "dockercompose": "version: '3.8'\nservices:\n  frontend:\n    image: nginx:alpine\n    ports:\n      - \"80:80\"\n    volumes:\n      - ./build:/usr/share/nginx/html",
+        "create": "toma1128/ai3",
+        "description": "ReactやVueなどでビルドした静的なWebサイトをNginxで配信するための構成です。"
+    },
+    {
+        "dockercompose": "version: '3.8'\nservices:\n  app:\n    build: .\n    ports:\n      - \"8000:8000\"\n    depends_on:\n      - redis\n  redis:\n    image: \"redis:alpine\"",
+        "create": "toma1128/ai4",
+        "description": "DjangoやRailsアプリケーションとRedisをキャッシュとして連携させる構成です。"
+    },
+    {
+        "dockercompose": "version: '3.8'\nservices:\n  wordpress:\n    image: wordpress:latest\n    ports:\n      - \"8080:80\"\n    depends_on:\n      - db\n  db:\n    image: mysql:5.7\n    environment:\n      MYSQL_DATABASE: wordpress\n      MYSQL_USER: user\n      MYSQL_PASSWORD: password\n      MYSQL_ROOT_PASSWORD: rootpassword",
+        "create": "toma1128/ai5",
+        "description": "WordPressとMySQLデータベースを起動するための標準的な構成です。"
+    }
+]
