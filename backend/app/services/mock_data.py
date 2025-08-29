@@ -41,9 +41,11 @@ def get_mock_data(query: Optional[str] = None) -> MockResponse:
         results = load_mock_data('mock_results.json')
     elif "python" in q_lower:
         results = load_mock_data('python_mock_results.json')
+    elif "react" in q_lower:
+        results = load_mock_data('react_mock_results.json')
     else:
         # 一致するキーワードがない場合はデフォルトのデータを返す
-        results = load_mock_data('react_mock_results.json')
+        results = []
 
     return MockResponse(
         results=[SearchResult(**result) for result in results],
