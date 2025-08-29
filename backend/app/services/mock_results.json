@@ -1,6 +1,6 @@
 [
     {
-        "dockercompose": "version: '3.8'\nservices:\n  web:\n    build: .\n    ports:\n      - \"3000:3000\"\n    depends_on:\n      - db\n  db:\n    image: postgres:13\n    environment:\n      POSTGRES_DB: myapp\n      POSTGRES_USER: user\n      POSTGRES_PASSWORD: password",
+        "dockercompose": "# Docker Composeの設定ファイル\nservices:\n  synctimer:\n    build: .\n    ports:\n      - \"8000:8000\"\n    restart: unless-stopped",
         "create": "Accord33/synctimer",
         "description": "SyncTimer - リアルタイム共有タイマーアプリケーション - 複数のユーザーが同じタイマーを同期して利用できるWebアプリケーション"
     },
